@@ -21,7 +21,8 @@ class Config:
 
     @classmethod
     def load(cls):
-        load_dotenv(ROOT / ".env", override=False)
+        config_file = Path(os.getenv("YF_CONFIG_FILE", str(ROOT / ".env")))
+        load_dotenv(config_file, override=False)
         data_dir = Path(os.getenv("YF_DATA_DIR", ".local"))
         if not data_dir.is_absolute():
             data_dir = ROOT / data_dir

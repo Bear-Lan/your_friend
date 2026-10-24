@@ -1,6 +1,6 @@
 # 运行本机验证版
 
-本版是模型与记忆链路的首个可运行原型，使用 FastAPI 和简单网页。它不是 Windows 安装包，也不是 Android APK。Flutter 客户端、手机配对与后台微调还没有实现。
+本文介绍 FastAPI 记忆服务与网页开发验证入口。原生 Windows 桌宠与 Android 客户端已经实现，运行和构建见 [客户端说明](../apps/client/README.md)。正式手机配对与后台微调尚未实现。
 
 ## 启动
 

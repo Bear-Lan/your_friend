@@ -4,7 +4,9 @@
 
 支持本地大模型与云端 API，拥有可查看、可修改、可遗忘的长期记忆，并通过按需检索控制每次对话的上下文大小。
 
-**当前阶段：已有可运行的本机聊天与记忆验证版。Windows 安装包、Android APK、后台微调尚未实现。**
+**当前阶段：已实现 Flutter 原生 Windows 桌宠与 Android 客户端、独立记忆服务。Windows 提供便携目录；Android 提供开发预览 APK 的构建脚本。手机正式配对、Live2D、自动性格养成和后台微调尚未实现。**
+
+桌宠默认约 220 × 320，透明无边框，点击展开聊天，拖动角色移动；右键角色或托盘图标可打开衣橱、设置、切换置顶或退出。使用本地二次元立绘和三套服装配色。原生客户端使用说明见 [Windows / Android](apps/client/README.md)。
 
 在本机双击 [start-yf.cmd](start-yf.cmd)，或执行 `uv sync --frozen --extra dev` 后运行 `.venv\Scripts\python.exe -m yf`，打开 `http://127.0.0.1:8765`。聊天需要先配置本地模型或 API；未配置时可先体验手动记忆。详见 [运行与数据管理](docs/running.md)。
 
@@ -12,7 +14,7 @@
 
 - 名称：`your friend`，简称 `yf`。
 - 定位：以陪伴为主，按多年持续维护来设计，让用户能够回看很久以前的重要经历。
-- 界面：只有一个持续聊天的主页面，以立体虚拟伙伴为中心，不提供新建对话或会话列表；回忆与设置收在抽屉中。原型已提供程序化 3D 角色、呼吸 / 眨眼 / 挥手及回应状态动作。
+- 界面：一个持续聊天；Windows 日常以小型桌宠陪伴，需要时展开聊天。Android 保留手机聊天页面。当前为可替换的本地二次元 2D 立绘；精细换装、Live2D / 3D 后续接入。
 - 平台：Windows 桌面端、Android 端；Android 最终提供可安装的 APK。
 - 模型：既能连接本地推理服务，也能接入云端 API。
 - 记忆：短期上下文、长期记忆、压缩、遗忘与用户主动管理。
@@ -42,14 +44,14 @@ Windows 端按桌面应用设计，管理本机服务的启动、健康检查和
 - [记忆生命周期与性能约束](docs/memory-design.md)
 - [性格养成、探索与对话训练](docs/personality-and-learning.md)
 - [可迁移的本地特征档案](docs/local-feature-profile.md)
-- [单一陪伴页面与立体形象](docs/companion-interface.md)
+- [桌宠、陪伴页面与角色](docs/companion-interface.md)
 - [闹钟、时间、电话等设备能力](docs/device-capabilities.md)
 - [分阶段交付与验收](docs/roadmap.md)
 - [已确认事项与待讨论选择](docs/decisions.md)
 
 ## 代码布局与后续目录
 
-服务、网页验证入口和测试已实现；Flutter 客户端与 contracts 目录仍在计划中。
+服务、Flutter 客户端、网页开发验证入口和测试已实现；自动生成的 contracts 客户端仍在计划中。
 
 ```text
 your_friend/

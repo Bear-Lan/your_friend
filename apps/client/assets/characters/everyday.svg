@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="424" viewBox="60 24 180 424">
+<defs>
+ <linearGradient id="hair" x2=".8" y2="1"><stop stop-color="#665a52"/><stop offset="1" stop-color="#3e3737"/></linearGradient>
+ <linearGradient id="skin" x2=".2" y2="1"><stop stop-color="#fff2e2"/><stop offset="1" stop-color="#f5d6c6"/></linearGradient>
+ <linearGradient id="coat" x2=".8" y2="1"><stop stop-color="#a7b7a0"/><stop offset="1" stop-color="#738a73"/></linearGradient>
+ <linearGradient id="eye" x2="0" y2="1"><stop stop-color="#34443f"/><stop offset=".6" stop-color="#71978a"/><stop offset="1" stop-color="#b4cbb0"/></linearGradient>
+</defs>
+<g stroke="#514644" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+ <!-- Silhouette and long, gently curved hair. -->
+ <path d="M78 94 Q63 137 71 206 Q73 243 91 265 L105 244 L190 244 L211 266 Q228 221 220 166 L217 95Z" fill="url(#hair)"/>
+ <path d="M77 151 Q78 213 92 244 M211 145 Q220 215 205 247" fill="none" stroke="#897365" stroke-width="2"/>
+ <!-- Legs and boots. -->
+ <path d="M116 322 L114 393 Q120 405 135 395 L142 325 M158 325 L164 395 Q176 405 186 393 L184 320" fill="#eadbcf"/>
+ <path d="M115 350 L114 396 Q120 404 135 396 L139 351 M161 351 L164 396 Q177 405 186 394 L184 350" fill="#49494b"/>
+ <path d="M113 392 Q122 399 136 392 L140 421 Q142 431 130 435 L102 435 Q96 430 105 424 L113 419Z" fill="#635751"/>
+ <path d="M164 392 Q177 398 186 391 L191 419 Q204 423 201 432 Q197 436 174 435 Q162 434 160 426Z" fill="#635751"/>
+ <path d="M103 435 L135 435 M167 435 L197 435" stroke="#d4c7b4" stroke-width="5"/>
+ <path d="M116 406 L130 408 M115 412 L131 413 M169 406 L182 405 M170 412 L184 411" stroke="#dccdb6" stroke-width="2"/>
+ <!-- Pleated skirt with alternating shaded folds. -->
+ <path d="M108 271 Q150 263 190 273 L204 328 Q151 349 96 328Z" fill="#55665c"/>
+ <path d="M117 281 L111 331 M135 282 L133 337 M155 283 L157 338 M174 282 L184 334" stroke="#ffffff" stroke-opacity=".18" stroke-width="4"/>
+ <path d="M104 321 Q151 339 197 321" fill="none" stroke="#d9d6c5" stroke-width="2"/>
+ <!-- Knit top and oversized jacket sleeves. -->
+ <path d="M111 196 Q149 181 188 196 Q190 231 192 285 Q151 300 108 284Z" fill="url(#coat)"/>
+ <path d="M116 195 L135 189 L149 216 L131 234Z M184 195 L167 189 L151 215 L170 234Z" fill="#e3e3cd"/>
+ <path d="M137 188 L163 188 L166 204 Q151 213 134 204Z" fill="#fff2df"/>
+ <path d="M141 188 L159 188 L161 200 L139 200Z" fill="#f2e0c8" stroke="none"/>
+ <path d="M149 218 L143 284" fill="none" stroke="#738a73" stroke-width="3"/>
+ <path d="M123 255 L137 255 M167 255 L181 253" stroke="#738a73" stroke-width="3"/>
+ <circle cx="151" cy="240" r="2.3" fill="#eee0bb" stroke="none"/><circle cx="149" cy="260" r="2.3" fill="#eee0bb" stroke="none"/>
+ <path d="M110 198 Q91 197 85 223 L78 271 Q84 281 102 278 L121 218" fill="url(#coat)"/>
+ <path d="M189 198 Q207 197 214 224 L221 270 Q215 281 198 277 L178 218" fill="url(#coat)"/>
+ <path d="M79 265 Q88 272 104 269 L102 281 Q86 285 77 275Z M197 269 Q211 273 220 265 L223 275 Q212 284 199 280Z" fill="#f2e9d9"/>
+ <path d="M80 279 Q75 293 85 300 Q94 303 99 293 L99 282 M202 282 Q205 299 213 301 Q224 300 219 279" fill="url(#skin)"/>
+ <path d="M85 287 L84 294 M213 287 L215 294" stroke="#dcab98" stroke-width="1.2"/>
+ <!-- Neck, soft face and ears. -->
+ <path d="M138 172 L137 191 Q150 201 164 191 L162 170" fill="url(#skin)"/>
+ <path d="M90 105 Q75 99 78 120 Q80 132 91 132 M209 104 Q225 99 221 121 Q218 133 207 131" fill="url(#skin)"/>
+ <path d="M87 87 Q83 126 100 153 Q118 179 149 181 Q179 179 197 155 Q215 129 211 87 Q149 43 87 87Z" fill="url(#skin)"/>
+ <path d="M93 132 Q100 157 124 168 M204 131 Q194 157 175 168" fill="none" stroke="#eac4ae" stroke-width="1.2" opacity=".6"/>
+ <!-- Anime eyes with a clear iris, reflected light and tapered lashes. -->
+ <path d="M104 111 Q113 101 128 108 Q137 123 124 136 Q111 142 103 129Z" fill="#fffef4" stroke="none"/>
+ <path d="M171 108 Q188 101 197 112 L197 129 Q187 140 176 136 Q163 125 171 108Z" fill="#fffef4" stroke="none"/>
+ <ellipse cx="119" cy="122" rx="10" ry="16" fill="url(#eye)" stroke="none"/>
+ <ellipse cx="181" cy="122" rx="10" ry="16" fill="url(#eye)" stroke="none"/>
+ <ellipse cx="119" cy="120" rx="4" ry="10" fill="#30453d" stroke="none"/><ellipse cx="181" cy="120" rx="4" ry="10" fill="#30453d" stroke="none"/>
+ <path d="M104 112 Q113 101 130 108 M170 108 Q186 101 197 112" fill="none" stroke="#443e3c" stroke-width="4"/>
+ <path d="M103 111 L98 107 M197 111 L202 107" stroke="#443e3c" stroke-width="2.8"/>
+ <path d="M108 137 Q119 142 128 136 M173 136 Q184 141 193 136" fill="none" stroke="#ad9381" stroke-width="1"/>
+ <ellipse cx="115" cy="115" rx="3.8" ry="5" fill="#fff" stroke="none"/><ellipse cx="177" cy="115" rx="3.8" ry="5" fill="#fff" stroke="none"/>
+ <circle cx="123" cy="130" r="2.5" fill="#e4eed6" stroke="none"/><circle cx="185" cy="130" r="2.5" fill="#e4eed6" stroke="none"/>
+ <path d="M107 97 Q117 93 128 97 M172 97 Q184 93 194 97" fill="none" stroke="#816c5c" stroke-width="1.6"/>
+ <ellipse cx="102" cy="145" rx="9" ry="3" fill="#e9aea0" opacity=".55" stroke="none"/><ellipse cx="197" cy="145" rx="9" ry="3" fill="#e9aea0" opacity=".55" stroke="none"/>
+ <path d="M148 139 L146 144 L150 145" fill="none" stroke="#d4a48b" stroke-width="1"/>
+ <path d="M141 157 Q150 163 159 157" fill="none" stroke="#b47f74" stroke-width="1.7"/>
+ <!-- Shaped fringe; side locks frame the face without covering it. -->
+ <path d="M83 112 Q67 78 91 51 Q111 29 149 34 Q192 24 214 59 Q228 87 213 118 L206 91 Q198 87 193 72 Q186 92 169 98 L170 77 Q158 96 136 99 L144 71 Q125 97 106 101 L115 74 Q95 91 91 115Z" fill="url(#hair)"/>
+ <path d="M109 55 Q91 72 90 93 M142 46 Q122 61 116 80 M176 45 Q169 65 160 78 M197 55 Q196 68 201 82" fill="none" stroke="#8e7d69" stroke-width="2.2" opacity=".65"/>
+ <path d="M86 103 Q77 138 91 184 L101 165 Q89 137 96 111Z M207 98 Q218 137 205 184 L196 168 Q207 138 200 107Z" fill="url(#hair)"/>
+ <path d="M82 194 Q83 218 94 236 M217 185 Q219 217 209 237" fill="none" stroke="#b4997d" stroke-width="1.3" opacity=".45"/>
+ <!-- Original leaf hairclip and small ribbon. -->
+ <path d="M91 78 Q76 67 78 57 Q92 60 94 74 Q101 60 111 60 Q110 75 96 80" fill="#b3bb94" stroke="#7b8463" stroke-width="1.5"/>
+ <path d="M80 61 L96 80 L107 64" fill="none" stroke="#ece8bc" stroke-width="1"/>
+ <path d="M146 214 Q129 202 127 214 Q128 223 146 219 M154 214 Q173 203 173 215 Q172 225 154 219" fill="#ab9478"/>
+ <path d="M146 218 L140 237 L152 231 L163 239 L156 218" fill="#ab9478"/>
+ <ellipse cx="150" cy="216" rx="5" ry="4" fill="#dbcba8"/>
+</g></svg>

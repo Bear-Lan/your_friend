@@ -28,3 +28,61 @@ jobs:
       - run: uv run --frozen ruff format --check .
       - run: uv run --frozen pytest -q
       - run: node --check services/memory_api/yf/web/app.js
+
+  client:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.8'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+        working-directory: apps/client
+      - run: dart format --output=none --set-exit-if-changed lib test
+        working-directory: apps/client
+      - run: flutter analyze
+        working-directory: apps/client
+      - run: flutter test
+        working-directory: apps/client
+      - uses: actions/setup-python@v5
+        if: runner.os == 'Windows'
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v6
+        if: runner.os == 'Windows'
+      - name: Build Windows portable app and service
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./tools/build-windows.ps1 -Flutter "$env:FLUTTER_ROOT/bin/flutter.bat"
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: your-friend-windows-preview
+          path: .local/releases/windows/
+
+  android-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.8'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+        working-directory: apps/client
+      - run: flutter build apk --debug
+        working-directory: apps/client
+      - uses: actions/upload-artifact@v4
+        with:
+          name: your-friend-android-development-apk
+          path: apps/client/build/app/outputs/flutter-apk/app-debug.apk
