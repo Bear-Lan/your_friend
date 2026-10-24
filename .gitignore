@@ -52,6 +52,7 @@ htmlcov/
 build/
 dist/
 .gradle/
+.kotlin/
 **/flutter/ephemeral/
 *.apk
 *.aab
