@@ -140,6 +140,10 @@ def create_app(config=None, provider=None, background=True):
     def conversations():
         return app.state.store.conversations()
 
+    @app.post("/api/companion")
+    def companion():
+        return app.state.store.companion_conversation()
+
     @app.post("/api/conversations", status_code=201)
     def create_conversation(body: ConversationCreate):
         return app.state.store.create_conversation(body.title)

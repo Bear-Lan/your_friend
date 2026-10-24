@@ -3,193 +3,252 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f5f3ed" />
+    <meta name="theme-color" content="#f3f0fa" />
     <title>your friend · yf</title>
     <link rel="stylesheet" href="/static/style.css" />
     <script src="/static/app.js" defer></script>
+    <script type="module" src="/static/avatar.js"></script>
   </head>
   <body>
-    <aside class="sidebar">
+    <header class="app-header">
       <a class="brand" href="/"
-        ><span class="mark">yf</span
-        ><span>your friend<small>一点一滴，慢慢相伴</small></span></a
+        ><span class="mark">yf<span class="brand-star">✦</span></span
+        ><span>your friend<small>你的日常，有我在场。</small></span></a
       >
-      <button id="new-chat" class="primary">＋ 开始一段新对话</button>
-      <nav aria-label="主要页面">
-        <button class="nav active" data-page="chat">
-          聊一会儿 <span>↗</span>
+      <nav aria-label="陪伴与管理">
+        <button class="nav" data-page="memories" aria-haspopup="dialog">
+          <span>✧</span> 回忆
         </button>
-        <button class="nav" data-page="memories">
-          我们的回忆 <span>✧</span>
-        </button>
-        <button class="nav" data-page="settings">
-          偏好与连接 <span>⚙</span>
+        <button class="nav" data-page="settings" aria-haspopup="dialog">
+          <span>⚙</span> 设置
         </button>
       </nav>
-      <div class="section-label">最近的对话</div>
-      <div id="conversations" class="conversations"></div>
-      <footer>
-        <span class="online-dot"></span> 本机验证版 · 0.1.0<br /><small
-          id="device-time"
-        ></small>
-      </footer>
-    </aside>
+    </header>
     <main>
-      <header class="topbar">
-        <span id="page-title">聊一会儿</span
-        ><span id="model-status" class="badge">正在连接本机服务</span>
-      </header>
       <div id="notice" role="status" class="notice" hidden></div>
       <section id="chat-page" class="page chat-page">
-        <div id="messages" class="messages" aria-live="polite">
-          <div class="welcome">
-            <div class="welcome-icon">✦</div>
-            <p class="eyebrow">YOUR FRIEND</p>
-            <h1>从今天，慢慢记住。</h1>
+        <div class="companion-stage">
+          <div class="stage-orbit orbit-one" aria-hidden="true"></div>
+          <div class="stage-orbit orbit-two" aria-hidden="true"></div>
+          <span class="stage-spark spark-one" aria-hidden="true">✦</span>
+          <span class="stage-spark spark-two" aria-hidden="true">✧</span>
+          <div class="stage-caption">
+            <span class="presence-dot"></span> OUR LITTLE SPACE
+            <span class="caption-line"></span>
+          </div>
+          <div
+            id="avatar-scene"
+            role="img"
+            aria-label="yf 立体虚拟伙伴，穿着淡紫色毛衣，正在轻轻呼吸"
+          >
+            <div id="avatar-fallback" class="avatar-fallback" hidden>
+              <span>✦</span>
+              <p>我在这里</p>
+              <small>当前设备暂不能显示立体形象</small>
+            </div>
+          </div>
+          <button
+            id="greet-avatar"
+            class="avatar-greeting"
+            aria-label="向 yf 挥挥手"
+          >
+            ✦ <span id="avatar-state">我在，慢慢说。</span>
+          </button>
+          <div class="stage-foot">
+            <span>yf / 陪伴形象 01</span
+            ><button id="motion-toggle" aria-pressed="false">暂停动作</button>
+          </div>
+        </div>
+        <div class="conversation-space">
+          <div class="conversation-heading">
+            <span class="eyebrow">JUST YOU &amp; ME</span
+            ><span class="connection-dot" title="本机服务状态"></span>
+          </div>
+          <div id="welcome" class="welcome">
+            <h1>今天，也陪着你<span>。</span></h1>
             <p>
-              今天发生了什么？<br />小小的日常，也可以是往后值得回看的片段。
+              不用想好开场白。<br />开心的、琐碎的，或是还没理清的心事，<br />都可以慢慢说给我听。
             </p>
             <div class="suggestions">
               <button data-suggestion="今天想跟你分享一件小事。">
-                分享今天的小事</button
-              ><button data-suggestion="我们先互相了解一下吧。">
-                从认识彼此开始
+                分享今天的小事 <span>↗</span></button
+              ><button data-suggestion="今天有点累，想和你待一会儿。">
+                就待一会儿 <span>↗</span>
               </button>
             </div>
           </div>
-        </div>
-        <form id="chat-form" class="composer">
-          <label class="sr-only" for="chat-input">想说的话</label
-          ><textarea
-            id="chat-input"
-            maxlength="5000"
-            rows="2"
-            placeholder="想说什么都可以……"
-          ></textarea>
-          <div class="composer-bottom">
-            <span>原始对话长期保留 · 记忆可查看与删除</span
-            ><button id="send" class="primary" type="submit">发送 ↑</button
-            ><button id="stop" type="button" hidden>停止回答</button>
-          </div>
-        </form>
-      </section>
-      <section id="memories-page" class="page content-page" hidden>
-        <p class="eyebrow">LITTLE THINGS THAT STAY</p>
-        <h1>我们的回忆</h1>
-        <p class="muted">
-          有些细节会慢慢淡去，重要的片段可以珍藏。原始记录仍可查阅。
-        </p>
-        <div class="toolbar">
-          <input
-            id="memory-query"
-            maxlength="200"
-            aria-label="搜索回忆"
-            placeholder="按事件、人物或关键词寻找……"
-          /><button id="search-memory">寻找记忆</button
-          ><button id="search-archive">查原始对话</button
-          ><button id="add-memory" class="primary">＋ 记下一件事</button>
-        </div>
-        <div id="memory-results" class="memory-grid"></div>
-        <button id="more-memories" hidden>再看一些</button>
-      </section>
-      <section id="settings-page" class="page content-page" hidden>
-        <p class="eyebrow">A LITTLE MORE LIKE US</p>
-        <h1>偏好与连接</h1>
-        <p class="muted">记忆、性格与模型训练分别管理。</p>
-        <form id="settings-form" class="settings-card">
-          <h2>记忆</h2>
-          <label class="switch-row"
-            ><span
-              >允许保存和使用长期记忆<small
-                >关闭后暂停提取与召回；原始聊天和已有记忆仍保留。</small
-              ></span
-            ><input type="checkbox" id="memory-enabled"
-          /></label>
-          <label class="switch-row"
-            ><span
-              >后台自动整理对话<small
-                >使用已配置的模型提取事实和事件，可能产生 API
-                用量。关闭后仍可手动记录。</small
-              ></span
-            ><input type="checkbox" id="auto-memory"
-          /></label>
-          <h2>初始交流倾向</h2>
-          <label for="personality" class="muted"
-            >可以调整；自动性格养成尚未实现。</label
-          ><textarea id="personality" maxlength="800" rows="3"></textarea>
-          <button class="primary" type="submit">保存偏好</button>
-        </form>
-        <form id="profile-form" class="settings-card">
-          <h2>本地特征档案 <span id="profile-version" class="badge"></span></h2>
-          <p class="muted">
-            换模型时继续使用同一份档案。数值是表达倾向，搭配文字解释传给模型；实际表现仍需体验。
+          <div
+            id="messages"
+            class="messages"
+            role="log"
+            aria-label="我们一直以来的聊天"
+            aria-live="polite"
+          ></div>
+          <form id="chat-form" class="composer">
+            <label class="sr-only" for="chat-input">想说的话</label
+            ><textarea
+              id="chat-input"
+              maxlength="5000"
+              rows="2"
+              placeholder="说给我听吧……"
+            ></textarea>
+            <div class="composer-bottom">
+              <span>Enter 发送 · Shift + Enter 换行</span
+              ><button
+                id="send"
+                class="primary"
+                type="submit"
+                aria-label="发送"
+              >
+                ↑</button
+              ><button id="stop" type="button" hidden>停止回答</button>
+            </div>
+          </form>
+          <p class="conversation-note">
+            <span class="tiny-star">✧</span> 一直是我们，接着上次慢慢聊。
           </p>
-          <div id="profile-expression" class="feature-grid"></div>
-          <label for="behavior-notes" class="muted">补充行为描述（可选）</label>
-          <textarea
-            id="behavior-notes"
-            rows="3"
-            maxlength="500"
-            placeholder="例如：认真听完再回应，少一些说教；严肃话题不刻意开玩笑。"
-          ></textarea>
-          <details>
-            <summary>记忆判断侧重</summary>
-            <p class="muted">
-              这些相对权重用于后台整理时辅助判断，不需要合计为
-              100。已记录的往事仍独立保存。
-            </p>
-            <div id="profile-importance" class="feature-grid"></div>
-          </details>
-          <details>
-            <summary>风格样例（可选）</summary>
-            <p class="muted">
-              最多三组。用于展示说话方式，不当作真实经历；每轮只加入预算内的样例。这里的手动内容与历史版本需单独管理。
-            </p>
-            <div id="profile-examples"></div>
-          </details>
-          <button class="primary" type="submit">保存特征档案</button>
+        </div>
+      </section>
+      <footer class="app-footer">
+        <span id="device-time"></span><span>一点一滴，慢慢相伴。</span
+        ><span id="model-status" class="badge">连接本机服务中</span>
+      </footer>
+      <dialog id="side-panel" class="side-panel" aria-labelledby="page-title">
+        <div class="panel-heading">
+          <span id="page-title">我们的回忆</span
+          ><button
+            class="close-dialog icon-button"
+            type="button"
+            aria-label="关闭面板"
+          >
+            ×
+          </button>
+        </div>
+        <section id="memories-page" class="page content-page" hidden>
+          <p class="eyebrow">LITTLE THINGS THAT STAY</p>
+          <h1>我们的回忆</h1>
+          <p class="muted">
+            有些细节会慢慢淡去，重要的片段可以珍藏。原始记录仍可查阅。
+          </p>
           <div class="toolbar">
-            <label for="profile-history" class="muted">历史版本</label>
-            <select id="profile-history" aria-label="特征档案历史版本"></select>
-            <button id="restore-profile" type="button">使用这个版本</button>
+            <input
+              id="memory-query"
+              maxlength="200"
+              aria-label="搜索回忆"
+              placeholder="按事件、人物或关键词寻找……"
+            /><button id="search-memory">寻找记忆</button
+            ><button id="search-archive">查原始对话</button
+            ><button id="add-memory" class="primary">＋ 记下一件事</button>
           </div>
-          <p class="muted">
-            当前支持手动调整、版本保存和回退；自动性格养成、微调特点自动总结尚未实现。手动档案即使修改，历史版本也会保留。
-          </p>
-        </form>
-        <div class="settings-card">
-          <h2>模型连接</h2>
-          <p id="connection-detail"></p>
-          <p class="muted">
-            在项目根目录复制 <code>.env.example</code> 为
-            <code>.env</code
-            >，设置接口地址、模型名称与所需密钥，再重启服务。密钥不发送给网页。
-          </p>
-          <p class="muted">
-            可连接 Ollama 的兼容接口或云端
-            API。使用云端时，本轮对话、相关记忆及后台整理片段会发送到该接口。
-          </p>
-        </div>
-        <div class="settings-card">
-          <h2>数据与能力</h2>
-          <div class="toolbar">
-            <a class="button" href="/api/export" download>导出对话与记忆</a
-            ><button id="backup">下载一致性备份</button>
+          <div id="memory-results" class="memory-grid"></div>
+          <button id="more-memories" hidden>再看一些</button>
+        </section>
+        <section id="settings-page" class="page content-page" hidden>
+          <p class="eyebrow">A LITTLE MORE LIKE US</p>
+          <h1>偏好与连接</h1>
+          <p class="muted">记忆、性格与模型训练分别管理。</p>
+          <form id="settings-form" class="settings-card">
+            <h2>记忆</h2>
+            <label class="switch-row"
+              ><span
+                >允许保存和使用长期记忆<small
+                  >关闭后暂停提取与召回；原始聊天和已有记忆仍保留。</small
+                ></span
+              ><input type="checkbox" id="memory-enabled"
+            /></label>
+            <label class="switch-row"
+              ><span
+                >后台自动整理对话<small
+                  >使用已配置的模型提取事实和事件，可能产生 API
+                  用量。关闭后仍可手动记录。</small
+                ></span
+              ><input type="checkbox" id="auto-memory"
+            /></label>
+            <h2>初始交流倾向</h2>
+            <label for="personality" class="muted"
+              >可以调整；自动性格养成尚未实现。</label
+            ><textarea id="personality" maxlength="800" rows="3"></textarea>
+            <button class="primary" type="submit">保存偏好</button>
+          </form>
+          <form id="profile-form" class="settings-card">
+            <h2>
+              本地特征档案 <span id="profile-version" class="badge"></span>
+            </h2>
+            <p class="muted">
+              换模型时继续使用同一份档案。数值是表达倾向，搭配文字解释传给模型；实际表现仍需体验。
+            </p>
+            <div id="profile-expression" class="feature-grid"></div>
+            <label for="behavior-notes" class="muted"
+              >补充行为描述（可选）</label
+            >
+            <textarea
+              id="behavior-notes"
+              rows="3"
+              maxlength="500"
+              placeholder="例如：认真听完再回应，少一些说教；严肃话题不刻意开玩笑。"
+            ></textarea>
+            <details>
+              <summary>记忆判断侧重</summary>
+              <p class="muted">
+                这些相对权重用于后台整理时辅助判断，不需要合计为
+                100。已记录的往事仍独立保存。
+              </p>
+              <div id="profile-importance" class="feature-grid"></div>
+            </details>
+            <details>
+              <summary>风格样例（可选）</summary>
+              <p class="muted">
+                最多三组。用于展示说话方式，不当作真实经历；每轮只加入预算内的样例。这里的手动内容与历史版本需单独管理。
+              </p>
+              <div id="profile-examples"></div>
+            </details>
+            <button class="primary" type="submit">保存特征档案</button>
+            <div class="toolbar">
+              <label for="profile-history" class="muted">历史版本</label>
+              <select
+                id="profile-history"
+                aria-label="特征档案历史版本"
+              ></select>
+              <button id="restore-profile" type="button">使用这个版本</button>
+            </div>
+            <p class="muted">
+              当前支持手动调整、版本保存和回退；自动性格养成、微调特点自动总结尚未实现。手动档案即使修改，历史版本也会保留。
+            </p>
+          </form>
+          <div class="settings-card">
+            <h2>模型连接</h2>
+            <p id="connection-detail"></p>
+            <p class="muted">
+              在项目根目录复制 <code>.env.example</code> 为
+              <code>.env</code
+              >，设置接口地址、模型名称与所需密钥，再重启服务。密钥不发送给网页。
+            </p>
+            <p class="muted">
+              可连接 Ollama 的兼容接口或云端
+              API。使用云端时，本轮对话、相关记忆及后台整理片段会发送到该接口。
+            </p>
           </div>
-          <p class="muted">
-            导出和备份包含个人数据，请妥善保存。恢复旧副本可能恢复已删除内容，详见运行文档。
-          </p>
-          <p>
-            后台微调、自动性格养成、手机配对、语义向量检索和闹钟／电话：尚未实现。
-          </p>
-          <p id="retrieval-detail" class="muted"></p>
-        </div>
-        <div class="settings-card">
-          <h2>记忆整理状态</h2>
-          <p id="job-status" class="muted"></p>
-          <div id="preferences"></div>
-        </div>
-      </section>
+          <div class="settings-card">
+            <h2>数据与能力</h2>
+            <div class="toolbar">
+              <a class="button" href="/api/export" download>导出对话与记忆</a
+              ><button id="backup">下载一致性备份</button>
+            </div>
+            <p class="muted">
+              导出和备份包含个人数据，请妥善保存。恢复旧副本可能恢复已删除内容，详见运行文档。
+            </p>
+            <p>
+              后台微调、自动性格养成、手机配对、语义向量检索和闹钟／电话：尚未实现。
+            </p>
+            <p id="retrieval-detail" class="muted"></p>
+          </div>
+          <div class="settings-card">
+            <h2>记忆整理状态</h2>
+            <p id="job-status" class="muted"></p>
+            <div id="preferences"></div>
+          </div>
+        </section>
+      </dialog>
     </main>
     <dialog id="memory-editor">
       <form id="memory-form">

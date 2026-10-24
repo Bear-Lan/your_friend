@@ -12,6 +12,7 @@
 
 - 名称：`your friend`，简称 `yf`。
 - 定位：以陪伴为主，按多年持续维护来设计，让用户能够回看很久以前的重要经历。
+- 界面：只有一个持续聊天的主页面，以立体虚拟伙伴为中心，不提供新建对话或会话列表；回忆与设置收在抽屉中。原型已提供程序化 3D 角色、呼吸 / 眨眼 / 挥手及回应状态动作。
 - 平台：Windows 桌面端、Android 端；Android 最终提供可安装的 APK。
 - 模型：既能连接本地推理服务，也能接入云端 API。
 - 记忆：短期上下文、长期记忆、压缩、遗忘与用户主动管理。
@@ -41,6 +42,7 @@ Windows 端按桌面应用设计，管理本机服务的启动、健康检查和
 - [记忆生命周期与性能约束](docs/memory-design.md)
 - [性格养成、探索与对话训练](docs/personality-and-learning.md)
 - [可迁移的本地特征档案](docs/local-feature-profile.md)
+- [单一陪伴页面与立体形象](docs/companion-interface.md)
 - [闹钟、时间、电话等设备能力](docs/device-capabilities.md)
 - [分阶段交付与验收](docs/roadmap.md)
 - [已确认事项与待讨论选择](docs/decisions.md)

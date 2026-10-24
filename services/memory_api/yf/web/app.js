@@ -144,7 +144,11 @@ function when(value) {
 }
 
 async function showPage(page) {
-  for (const name of ["chat", "memories", "settings"])
+  if (page === "chat") {
+    $("side-panel").close();
+    return;
+  }
+  for (const name of ["memories", "settings"])
     $(name + "-page").hidden = name !== page;
   document
     .querySelectorAll(".nav")
@@ -156,37 +160,31 @@ async function showPage(page) {
     memories: "我们的回忆",
     settings: "偏好与连接",
   }[page];
+  if (!$("side-panel").open) $("side-panel").showModal();
   if (page === "memories") await loadMemories();
   if (page === "settings") await refreshStatus(true);
 }
 
-async function loadConversations() {
-  const rows = await json("/api/conversations");
-  $("conversations").replaceChildren(
-    ...rows.map((row) => {
-      const item = button(
-        row.title,
-        async () => {
-          if (controller) {
-            notice("请先停止正在生成的回答。");
-            return;
-          }
-          conversationId = row.id;
-          await showPage("chat");
-          await loadMessages();
-          await loadConversations();
-        },
-        "conversation" + (row.id === conversationId ? " selected" : ""),
-      );
-      item.title = row.title;
-      return item;
-    }),
-  );
+async function connectCompanion() {
+  const companion = await json("/api/companion", { method: "POST" });
+  conversationId = companion.id;
+  await loadMessages();
+}
+
+function companionState(state) {
+  document.body.dataset.companionState = state;
+  $("avatar-state").textContent = {
+    idle: "我在，慢慢说。",
+    thinking: "让我想一想……",
+    answering: "正在回应你……",
+    unavailable: "连接暂时没跟上。",
+  }[state];
 }
 
 function addMessage(role, content, state = "completed", prepend = false) {
   const item = document.createElement("div");
   item.className = "message " + role;
+  $("welcome").hidden = true;
   const speaker = document.createElement("span");
   speaker.className = "speaker";
   speaker.textContent = role === "user" ? "你" : "yf";
@@ -213,6 +211,7 @@ function addMessage(role, content, state = "completed", prepend = false) {
 
 async function loadMessages(before = null) {
   if (!conversationId) return;
+  const previousHeight = $("messages").scrollHeight;
   const rows = await json(
     `/api/conversations/${conversationId}/messages` +
       (before ? `?before=${before}` : ""),
@@ -229,13 +228,17 @@ async function loadMessages(before = null) {
     older.id = "load-older";
     $("messages").prepend(older);
   }
+  $("welcome").hidden = $("messages").childElementCount > 0;
+  $("messages").classList.toggle("has-messages", $("welcome").hidden);
   if (!before) $("messages").scrollTop = $("messages").scrollHeight;
+  if (before)
+    $("messages").scrollTop += $("messages").scrollHeight - previousHeight;
 }
 
 async function refreshStatus(fillForm = false) {
   statusData = await json("/api/status");
   $("model-status").textContent = statusData.model_configured
-    ? statusData.model_name || "模型已配置"
+    ? (statusData.model_name || "模型") + " · 已配置"
     : "尚未配置聊天模型";
   $("model-status").classList.toggle("ready", statusData.model_configured);
   $("connection-detail").textContent = statusData.model_configured
@@ -273,23 +276,19 @@ async function sendMessage(event) {
     return;
   }
   controller = new AbortController();
+  notice("");
+  companionState("thinking");
   $("send").hidden = true;
   $("stop").hidden = false;
   $("chat-input").disabled = true;
   let responseText = "",
     bubble = null;
   try {
-    if (!conversationId) {
-      conversationId = (
-        await json("/api/conversations", {
-          method: "POST",
-          body: JSON.stringify({}),
-        })
-      ).id;
-      $("messages").replaceChildren();
-    }
+    if (!conversationId) await connectCompanion();
     addMessage("user", content);
     bubble = addMessage("assistant", "");
+    $("messages").classList.add("has-messages");
+    $("messages").scrollTop = $("messages").scrollHeight;
     const response = await api(`/api/conversations/${conversationId}/chat`, {
       method: "POST",
       body: JSON.stringify({ content, request_id: crypto.randomUUID() }),
@@ -319,15 +318,24 @@ async function sendMessage(event) {
         if (!payload) continue;
         const data = JSON.parse(payload);
         if (kind === "delta") {
+          companionState("answering");
           responseText += data.text;
           bubble.textContent = responseText;
           $("messages").scrollTop = $("messages").scrollHeight;
         }
-        if (kind === "error") notice(data.message, true);
+        if (kind === "error") {
+          companionState("unavailable");
+          bubble.textContent =
+            responseText || "连接暂时没有成功，你的话已经保存。";
+          bubble.parentElement.append(paragraph("回答未完成", "message-state"));
+          notice(data.message, true);
+        }
+        if (kind === "done") companionState("idle");
       }
       if (done) break;
     }
   } catch (error) {
+    companionState(error.name === "AbortError" ? "idle" : "unavailable");
     notice(
       error.name === "AbortError"
         ? "已停止回答；收到的内容会保留。"
@@ -342,7 +350,8 @@ async function sendMessage(event) {
     $("stop").hidden = true;
     $("chat-input").disabled = false;
     $("chat-input").focus();
-    await loadConversations().catch(() => {});
+    if (document.body.dataset.companionState === "thinking")
+      companionState("idle");
   }
 }
 
@@ -478,18 +487,10 @@ document.querySelectorAll("[data-suggestion]").forEach((item) =>
     $("chat-input").focus();
   }),
 );
-$("new-chat").addEventListener("click", () => {
-  if (controller) {
-    notice("请先停止正在生成的回答。");
-    return;
-  }
-  conversationId = null;
-  showPage("chat");
-  $("messages").replaceChildren(
-    paragraph("新的一段对话。想从什么开始？", "empty"),
-  );
-  loadConversations().catch((error) => notice(error.message));
-  $("chat-input").focus();
+$("side-panel").addEventListener("close", () => {
+  document
+    .querySelectorAll(".nav")
+    .forEach((item) => item.classList.remove("active"));
 });
 $("chat-form").addEventListener("submit", sendMessage);
 $("chat-input").addEventListener("keydown", (event) => {
@@ -551,11 +552,20 @@ $("search-archive").addEventListener("click", async () => {
         card.append(
           paragraph(when(row.created_at), "muted"),
           paragraph(row.content),
-          button("打开当时的会话", async () => {
-            conversationId = row.conversation_id;
-            await showPage("chat");
-            await loadMessages();
-            await loadConversations();
+          button("查看当时的记录", async () => {
+            const history = await json(
+              `/api/conversations/${row.conversation_id}/messages?before=${row.seq + 1}&limit=12`,
+            );
+            $("detail-title").textContent = "当时的记录";
+            $("detail-content").replaceChildren(
+              ...history.map((message) =>
+                paragraph(
+                  `${message.role === "user" ? "你" : "yf"} · ${when(message.created_at)}\n${message.content}`,
+                  "source",
+                ),
+              ),
+            );
+            $("memory-detail").showModal();
           }),
         );
         return card;
@@ -675,7 +685,7 @@ function clock() {
 }
 clock();
 setInterval(clock, 30000);
-Promise.all([refreshStatus(true), loadConversations()]).catch((error) =>
+Promise.all([refreshStatus(true), connectCompanion()]).catch((error) =>
   notice("本机服务暂不可用：" + error.message, true),
 );
 setInterval(() => {

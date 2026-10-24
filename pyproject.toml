@@ -22,7 +22,7 @@ dev = ["pytest>=8,<10", "ruff>=0.11,<1"]
 where = ["services/memory_api"]
 
 [tool.setuptools.package-data]
-yf = ["web/*"]
+yf = ["web/*", "web/vendor/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

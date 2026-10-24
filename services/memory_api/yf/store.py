@@ -178,6 +178,16 @@ class Store:
     def conversations(self):
         return self.all("SELECT * FROM conversations ORDER BY updated_at DESC LIMIT 100")
 
+    def companion_conversation(self):
+        """One stable conversation for the companion, shared across clients and restarts."""
+        with self.lock, self.db:
+            now = timestamp()
+            self.db.execute(
+                "INSERT OR IGNORE INTO conversations VALUES (?,?,?,?)",
+                ("yf-companion", "一直在这里", now, now),
+            )
+            return self.conversation("yf-companion")
+
     def messages(self, conversation_id, before=None, limit=80):
         self.conversation(conversation_id)
         rows = self.all(
@@ -422,7 +432,7 @@ class Store:
         if not expression:
             return []
         return self.all(
-            """SELECT m.id,m.conversation_id,m.content,m.created_at FROM message_search s JOIN messages m ON m.id=s.id
+            """SELECT m.id,m.seq,m.conversation_id,m.content,m.created_at FROM message_search s JOIN messages m ON m.id=s.id
           WHERE message_search MATCH ? AND m.status!='deleted' ORDER BY bm25(message_search) LIMIT ?""",
             (expression, limit),
         )
