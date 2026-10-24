@@ -13,6 +13,10 @@ local.properties
 /.local/
 /data/
 /models/
+/datasets/
+/training_runs/
+/adapters/
+/checkpoints/
 /logs/
 *.db
 *.db-wal
