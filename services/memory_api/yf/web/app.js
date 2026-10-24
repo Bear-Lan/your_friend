@@ -5,6 +5,93 @@ let statusData = null;
 let memoryOffset = 0;
 let oldestSeq = null;
 let noticeTimer = null;
+let profileVersion = null;
+
+const expressionFeatures = {
+  warmth: ["温暖程度", "克制 → 温暖关切"],
+  humor: ["幽默倾向", "少用玩笑 → 适时诙谐"],
+  curiosity: ["好奇倾向", "跟随话题 → 愿意探索"],
+  directness: ["直接程度", "委婉 → 直接清楚"],
+  detail: ["展开程度", "简短 → 详细"],
+  initiative: ["话题主动程度", "跟随用户 → 适时提议"],
+};
+const importanceFeatures = {
+  explicit_emphasis: ["用户明确重视", "你说这件事很重要"],
+  personal_significance: ["个人意义", "与你的经历和关系有关"],
+  lasting_relevance: ["长期相关性", "未来仍可能有用或值得回看"],
+};
+
+function fillWeights(container, section, definitions, values) {
+  $(container).replaceChildren(
+    ...Object.entries(definitions).map(([key, [title, hint]]) => {
+      const row = document.createElement("label");
+      row.className = "feature-control";
+      const label = document.createElement("span");
+      label.textContent = title;
+      const value = document.createElement("output");
+      value.textContent = Math.round(values[key] * 100);
+      const slider = document.createElement("input");
+      slider.type = "range";
+      slider.min = "0";
+      slider.max = "1";
+      slider.step = "0.05";
+      slider.value = values[key];
+      slider.id = `feature-${section}-${key}`;
+      slider.setAttribute("aria-label", title);
+      slider.addEventListener("input", () => {
+        value.textContent = Math.round(Number(slider.value) * 100);
+      });
+      const help = document.createElement("small");
+      help.textContent = hint;
+      row.append(label, value, slider, help);
+      return row;
+    }),
+  );
+}
+
+function fillProfile(data, history) {
+  profileVersion = data.version;
+  $("profile-version").textContent = `版本 ${data.version}`;
+  fillWeights(
+    "profile-expression",
+    "expression",
+    expressionFeatures,
+    data.document.expression,
+  );
+  fillWeights(
+    "profile-importance",
+    "importance",
+    importanceFeatures,
+    data.document.importance,
+  );
+  $("behavior-notes").value = data.document.behavior_notes;
+  $("profile-examples").replaceChildren(
+    ...[0, 1, 2].map((index) => {
+      const row = document.createElement("div");
+      row.className = "example-pair";
+      for (const role of ["user", "assistant"]) {
+        const label = document.createElement("label");
+        label.textContent = `样例 ${index + 1} · ${role === "user" ? "用户的话" : "理想回应"}`;
+        const input = document.createElement("textarea");
+        input.rows = 2;
+        input.id = `profile-example-${index}-${role}`;
+        input.maxLength = role === "user" ? 200 : 400;
+        input.value = data.document.examples[index]?.[role] || "";
+        label.append(input);
+        row.append(label);
+      }
+      return row;
+    }),
+  );
+  $("profile-history").replaceChildren(
+    ...history.map((item) => {
+      const option = document.createElement("option");
+      option.value = item.version;
+      option.textContent = `版本 ${item.version} · ${when(item.created_at)}${item.version === data.version ? "（当前）" : ""}`;
+      return option;
+    }),
+  );
+}
 
 function notice(text, sticky = false) {
   clearTimeout(noticeTimer);
@@ -173,6 +260,7 @@ async function refreshStatus(fillForm = false) {
     $("memory-enabled").checked = statusData.settings.memory_enabled;
     $("auto-memory").checked = statusData.settings.auto_memory;
     $("personality").value = statusData.settings.personality;
+    fillProfile(statusData.feature_profile, statusData.profile_history);
   }
 }
 
@@ -493,6 +581,71 @@ $("settings-form").addEventListener("submit", async (event) => {
     });
     notice("偏好已保存。");
     await refreshStatus();
+  } catch (error) {
+    notice(error.message);
+  }
+});
+$("profile-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const weights = (section, definitions) =>
+    Object.fromEntries(
+      Object.keys(definitions).map((key) => [
+        key,
+        Number($(`feature-${section}-${key}`).value),
+      ]),
+    );
+  const examples = [0, 1, 2].map((index) => ({
+    user: $(`profile-example-${index}-user`).value.trim(),
+    assistant: $(`profile-example-${index}-assistant`).value.trim(),
+  }));
+  if (
+    examples.some(
+      (example) => Boolean(example.user) !== Boolean(example.assistant),
+    )
+  ) {
+    notice("风格样例需要同时填写用户的话和理想回应，或将这组全部留空。");
+    return;
+  }
+  try {
+    await json("/api/profile", {
+      method: "PUT",
+      body: JSON.stringify({
+        expected_version: profileVersion,
+        document: {
+          expression: weights("expression", expressionFeatures),
+          importance: weights("importance", importanceFeatures),
+          behavior_notes: $("behavior-notes").value,
+          examples: examples.filter(
+            (example) => example.user && example.assistant,
+          ),
+        },
+      }),
+    });
+    await refreshStatus(true);
+    notice("已保存为新版本，下一次回答将使用这份特征档案。");
+  } catch (error) {
+    notice(error.message);
+  }
+});
+$("restore-profile").addEventListener("click", async () => {
+  const version = Number($("profile-history").value);
+  if (version === profileVersion) {
+    notice("已经在使用这个版本。");
+    return;
+  }
+  if (
+    !confirm(
+      "将使用选中的特征档案，并保留为一个新版本。页面上未保存的特征调整会被替换，继续吗？",
+    )
+  )
+    return;
+  try {
+    await json("/api/profile/restore", {
+      method: "POST",
+      body: JSON.stringify({ version, expected_version: profileVersion }),
+    });
+    await refreshStatus(true);
+    notice("已恢复所选档案；模型和记忆没有重置。");
   } catch (error) {
     notice(error.message);
   }

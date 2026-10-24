@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
+from .profile import FeatureProfile
 from .search import indexed, match_expression, overlap, project_memory
 
 
@@ -32,11 +33,14 @@ class Store:
         self.lock = threading.RLock()
         self.db = sqlite3.connect(path, check_same_thread=False, timeout=10)
         self.db.row_factory = sqlite3.Row
+        version = self.db.execute("PRAGMA user_version").fetchone()[0]
+        if version > 2:
+            self.db.close()
+            raise RuntimeError("数据库版本较新，请先更新 yf；未修改数据库。")
+        if version == 1:
+            self.backup(path.parent / "backups" / f"before-schema-2-{uid()}.sqlite3")
         self.db.execute("PRAGMA foreign_keys=ON")
         self.db.execute("PRAGMA journal_mode=WAL")
-        version = self.db.execute("PRAGMA user_version").fetchone()[0]
-        if version > 1:
-            raise RuntimeError("数据库版本较新，请先更新 yf；未修改数据库。")
         self.db.executescript("""
             CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS conversations(
@@ -76,9 +80,12 @@ class Store:
             CREATE TABLE IF NOT EXISTS deletion_records(
               id TEXT PRIMARY KEY, memory_ids TEXT NOT NULL, message_ids TEXT NOT NULL,
               created_at TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS feature_profiles(
+              version INTEGER PRIMARY KEY AUTOINCREMENT,
+              document TEXT NOT NULL, created_at TEXT NOT NULL, source TEXT NOT NULL);
             CREATE VIRTUAL TABLE IF NOT EXISTS memory_search USING fts5(id UNINDEXED, terms);
             CREATE VIRTUAL TABLE IF NOT EXISTS message_search USING fts5(id UNINDEXED, terms);
-            PRAGMA user_version=1;
+            PRAGMA user_version=2;
         """)
         with self.lock, self.db:
             defaults = {
@@ -90,6 +97,11 @@ class Store:
                 self.db.execute(
                     "INSERT OR IGNORE INTO settings VALUES (?,?)",
                     (key, json.dumps(value, ensure_ascii=False)),
+                )
+            if not self.one("SELECT version FROM feature_profiles LIMIT 1"):
+                self.db.execute(
+                    "INSERT INTO feature_profiles(document,created_at,source) VALUES (?,?,?)",
+                    (FeatureProfile().model_dump_json(), timestamp(), "initial"),
                 )
             self.db.execute("UPDATE turns SET status='interrupted' WHERE status='running'")
             self.db.execute("UPDATE messages SET status='interrupted' WHERE status='pending'")
@@ -118,6 +130,36 @@ class Store:
                     (json.dumps(value, ensure_ascii=False), key),
                 )
         return self.settings()
+
+    def feature_profile(self):
+        row = self.one("SELECT * FROM feature_profiles ORDER BY version DESC LIMIT 1")
+        row["document"] = json.loads(row["document"])
+        return row
+
+    def profile_history(self):
+        return self.all(
+            "SELECT version,created_at,source FROM feature_profiles ORDER BY version DESC LIMIT 30"
+        )
+
+    def update_profile(self, document, expected_version, source="user"):
+        document = FeatureProfile.model_validate(document).model_dump()
+        with self.lock, self.db:
+            if self.feature_profile()["version"] != expected_version:
+                raise Conflict("特征档案已在其他页面更新，请重新加载后再保存。")
+            self.db.execute(
+                "INSERT INTO feature_profiles(document,created_at,source) VALUES (?,?,?)",
+                (json.dumps(document, ensure_ascii=False), timestamp(), source),
+            )
+            return self.feature_profile()
+
+    def restore_profile(self, version, expected_version):
+        with self.lock:
+            row = self.one("SELECT document FROM feature_profiles WHERE version=?", (version,))
+            if not row:
+                raise Missing("特征档案版本不存在")
+            return self.update_profile(
+                json.loads(row["document"]), expected_version, source=f"restore:{version}"
+            )
 
     def conversation(self, conversation_id):
         row = self.one("SELECT * FROM conversations WHERE id=?", (conversation_id,))
@@ -529,9 +571,13 @@ class Store:
     def export(self):
         return {
             "format": "yf-archive",
-            "version": 1,
+            "version": 2,
             "exported_at": timestamp(),
             "settings": self.settings(),
+            "feature_profiles": [
+                row | {"document": json.loads(row["document"])}
+                for row in self.all("SELECT * FROM feature_profiles ORDER BY version")
+            ],
             "conversations": self.all("SELECT * FROM conversations"),
             "messages": self.all("SELECT * FROM messages ORDER BY seq"),
             "memories": [

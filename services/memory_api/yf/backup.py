@@ -17,7 +17,7 @@ def restore_to_new_directory(source: Path, destination: Path) -> Path:
         }
         if not {"memories", "messages", "settings", "deletion_records"} <= tables:
             raise ValueError("这不是 yf 的数据库备份。")
-        if original.execute("PRAGMA user_version").fetchone()[0] != 1:
+        if original.execute("PRAGMA user_version").fetchone()[0] not in {1, 2}:
             raise ValueError("备份版本不兼容，请使用与备份匹配的 yf 版本。")
         destination.mkdir(parents=True, exist_ok=True)
         with target_path.open("xb"):

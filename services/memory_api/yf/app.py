@@ -14,6 +14,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from . import __version__
 from .config import Config
 from .memory import MemoryWorker, build_context
+from .profile import ProfileRestore, ProfileUpdate
 from .provider import ModelError, Provider
 from .schemas import (
     ChatRequest,
@@ -112,6 +113,8 @@ def create_app(config=None, provider=None, background=True):
             "settings": store.settings(),
             "jobs": store.jobs(),
             "memory_preferences": store.preference_profile(),
+            "feature_profile": store.feature_profile(),
+            "profile_history": store.profile_history(),
             "retrieval": "中文字符组合与关键词检索；语义向量检索尚未接入",
             "fine_tuning_available": False,
             "platform": "本机验证版，Windows / Android 正式客户端尚未实现",
@@ -120,6 +123,18 @@ def create_app(config=None, provider=None, background=True):
     @app.patch("/api/settings")
     def settings(body: SettingsUpdate):
         return app.state.store.update_settings(body.model_dump(exclude_none=True))
+
+    @app.get("/api/profile")
+    def profile():
+        return app.state.store.feature_profile()
+
+    @app.put("/api/profile")
+    def update_profile(body: ProfileUpdate):
+        return app.state.store.update_profile(body.document.model_dump(), body.expected_version)
+
+    @app.post("/api/profile/restore")
+    def restore_profile(body: ProfileRestore):
+        return app.state.store.restore_profile(body.version, body.expected_version)
 
     @app.get("/api/conversations")
     def conversations():

@@ -1,3 +1,49 @@
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 18px 28px;
+  margin: 22px 0;
+}
+.feature-control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  font-size: 13px;
+}
+.feature-control input {
+  width: 100%;
+  grid-column: 1 / -1;
+  padding: 0;
+  accent-color: var(--green);
+}
+.feature-control small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 11px;
+}
+.feature-control output {
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+.settings-card details {
+  margin: 20px 0;
+}
+.settings-card summary {
+  cursor: pointer;
+  font-size: 13px;
+}
+.example-pair {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.example-pair label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+.example-pair textarea {
+  font-size: 13px;
+}
 :root {
   --bg: #f8f7f2;
   --panel: #efeee7;

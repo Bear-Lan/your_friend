@@ -119,6 +119,44 @@
           ><textarea id="personality" maxlength="800" rows="3"></textarea>
           <button class="primary" type="submit">保存偏好</button>
         </form>
+        <form id="profile-form" class="settings-card">
+          <h2>本地特征档案 <span id="profile-version" class="badge"></span></h2>
+          <p class="muted">
+            换模型时继续使用同一份档案。数值是表达倾向，搭配文字解释传给模型；实际表现仍需体验。
+          </p>
+          <div id="profile-expression" class="feature-grid"></div>
+          <label for="behavior-notes" class="muted">补充行为描述（可选）</label>
+          <textarea
+            id="behavior-notes"
+            rows="3"
+            maxlength="500"
+            placeholder="例如：认真听完再回应，少一些说教；严肃话题不刻意开玩笑。"
+          ></textarea>
+          <details>
+            <summary>记忆判断侧重</summary>
+            <p class="muted">
+              这些相对权重用于后台整理时辅助判断，不需要合计为
+              100。已记录的往事仍独立保存。
+            </p>
+            <div id="profile-importance" class="feature-grid"></div>
+          </details>
+          <details>
+            <summary>风格样例（可选）</summary>
+            <p class="muted">
+              最多三组。用于展示说话方式，不当作真实经历；每轮只加入预算内的样例。这里的手动内容与历史版本需单独管理。
+            </p>
+            <div id="profile-examples"></div>
+          </details>
+          <button class="primary" type="submit">保存特征档案</button>
+          <div class="toolbar">
+            <label for="profile-history" class="muted">历史版本</label>
+            <select id="profile-history" aria-label="特征档案历史版本"></select>
+            <button id="restore-profile" type="button">使用这个版本</button>
+          </div>
+          <p class="muted">
+            当前支持手动调整、版本保存和回退；自动性格养成、微调特点自动总结尚未实现。手动档案即使修改，历史版本也会保留。
+          </p>
+        </form>
         <div class="settings-card">
           <h2>模型连接</h2>
           <p id="connection-detail"></p>

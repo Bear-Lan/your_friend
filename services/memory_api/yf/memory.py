@@ -3,6 +3,7 @@ import json
 import logging
 
 from .config import Config
+from .profile import compile_style, importance_policy
 from .schemas import Extraction
 
 BASE_PROMPT = """你是 your friend（yf），一个真诚、自然的长期陪伴助手。
@@ -13,13 +14,30 @@ BASE_PROMPT = """你是 your friend（yf），一个真诚、自然的长期陪�
 
 def build_context(store, config: Config, conversation_id, content):
     settings = store.settings()
-    prompt = BASE_PROMPT + "\n交流倾向：" + settings["personality"]
+    profile = store.feature_profile()
+    prompt = (
+        BASE_PROMPT
+        + "\n交流倾向："
+        + settings["personality"]
+        + "\n本地档案版本："
+        + str(profile["version"])
+        + "\n"
+        + compile_style(profile["document"])
+    )
     recalled = store.retrieve(content) if settings["memory_enabled"] else []
     packed, used = [], 0
     for memory in recalled:
         entry = {
             key: memory[key]
-            for key in ("id", "outline", "detail", "occurred_on", "confidence", "missing_details")
+            for key in (
+                "id",
+                "outline",
+                "detail",
+                "occurred_on",
+                "importance",
+                "confidence",
+                "missing_details",
+            )
         }
         remaining = config.memory_chars - used
         size = len(json.dumps(entry, ensure_ascii=False))
@@ -86,6 +104,9 @@ class MemoryWorker:
             for memory in context["known_memories"]
         ]
         context["preferences"] = context["preferences"][:16]
+        profile = self.store.feature_profile()
+        context["importance_policy"] = importance_policy(profile["document"])
+        context["profile_version"] = profile["version"]
         while len(json.dumps(context, ensure_ascii=False)) > 16000 and len(context["messages"]) > 1:
             context["messages"].pop(0)
         while len(json.dumps(context, ensure_ascii=False)) > 16000 and context["known_memories"]:
