@@ -1,0 +1,63 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.jks
+*.keystore
+*.p12
+key.properties
+local.properties
+
+# User data and model assets
+/.local/
+/data/
+/models/
+/logs/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.gguf
+*.safetensors
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Flutter / Dart / native build outputs
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+dist/
+.gradle/
+**/flutter/ephemeral/
+*.apk
+*.aab
+*.msix
+*.msixbundle
+
+# Tooling and OS
+node_modules/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
